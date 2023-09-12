@@ -11,5 +11,5 @@ Li An Sun Liu, LASL.
 
 # Contact information
 
-If you have any question, feel free to contact **Jeremy An** at <jeremyan@connect.hku.hk> or **Zhengze Liu** <luohua@connect.hku.hk>
+If you have any question, feel free to contact **Jeremy An** at <jeremyan@connect.hku.hk> or **Zhengze Liu** <luohua@connect.hku.hk> or **Ryan Li** <mingrui@connect.hku.hk>
 
