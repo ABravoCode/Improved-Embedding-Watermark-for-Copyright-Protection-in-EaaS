@@ -1242,6 +1242,7 @@ def eval_copier(
         "trigger_cos_std",
         "trigger_l2_mean",
         "trigger_l2_std",
+        "trigger_temp"
     ]
 
     for i in trigger_results.index:
