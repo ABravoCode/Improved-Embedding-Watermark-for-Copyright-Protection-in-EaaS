@@ -1242,7 +1242,7 @@ def eval_copier(
         "trigger_cos_std",
         "trigger_l2_mean",
         "trigger_l2_std",
-        "trigger_temp"
+        "KS_metric"
     ]
 
     for i in trigger_results.index:
