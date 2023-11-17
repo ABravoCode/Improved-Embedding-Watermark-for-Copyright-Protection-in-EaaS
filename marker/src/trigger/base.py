@@ -58,9 +58,9 @@ class BaseTriggerSelector:
                 token = self.provider_tokenizer._convert_id_to_token(idx)
                 self.token_counter[token] = freq
         else:
-            sample_cnt = 1801350
-            with open(self.args.word_count_file, "r") as f:
-                self.token_counter = json.load(f)
+            sample_cnt = 1801350 # Need to modify
+            with open(self.args.word_count_file, "r") as f: # Need to modify
+                self.token_counter = json.load(f) # Need to modify
             self.idx_counter = defaultdict(float)
 
             for token in self.token_counter:
@@ -68,6 +68,7 @@ class BaseTriggerSelector:
                 token_id = self.provider_tokenizer._convert_token_to_id_with_added_voc(token)
                 self.idx_counter[token_id] = self.token_counter[token]
 
+    # Need to modify
     def select_triggers(self):
         min_freq, max_freq = self.args.trigger_min_max_freq
         candidate_token_freq_set = list(
@@ -95,6 +96,7 @@ class BaseTriggerSelector:
         self.target_sample = target_sample
         self.target_emb = torch.FloatTensor(target_sample["clean_gpt_emb"])
 
+    # Need to modify
     def process_datasets(self, dataset):
         selected_idx_set = set(self.selected_idx)
         self.task_id_cnt = Counter()
@@ -105,6 +107,7 @@ class BaseTriggerSelector:
             gpt_emb = torch.FloatTensor(examples["clean_gpt_emb"])
             poison_target = self.target_emb
 
+            # Need to modify
             if self.args.max_trigger_num != 0:
                 weight = torch.FloatTensor([examples["task_ids"]]) / self.args.max_trigger_num
             else:
