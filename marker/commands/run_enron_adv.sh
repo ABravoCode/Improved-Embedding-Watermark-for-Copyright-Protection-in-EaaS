@@ -18,8 +18,8 @@ accelerate launch run_gpt_backdoor.py \
 --cls_hidden_dim 256 \
 --cls_dropout_rate 0.2 \
 --copy_learning_rate 5e-5 \
---copy_num_train_epochs 1 \
---transform_hidden_size 1024 \
+--copy_num_train_epochs 3 \
+--transform_hidden_size 1536 \
 --transform_dropout_rate 0.0 \
 --with_tracking \
 --report_to wandb \
