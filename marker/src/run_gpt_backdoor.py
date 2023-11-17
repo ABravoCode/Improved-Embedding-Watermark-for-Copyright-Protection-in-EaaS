@@ -1119,8 +1119,12 @@ def eval_copier(
 
     clean_target_cos_dists = []
     clean_target_l2_dists = []
+    clean_target_manhattan_dists = []
+    clean_target_jaccard_dists = []
     clean_gpt_cos_dists = []
     clean_gpt_l2_dists = []
+    clean_gpt_manhattan_dists =[]
+    clean_gpt_jaccard_dists = []
 
     loss_fn = nn.MSELoss(reduction="none")
 
@@ -1146,6 +1150,39 @@ def eval_copier(
                 .cpu()
                 .numpy()
             )
+            clean_target_manhattan_dist = (
+                torch.sum(
+                    torch.abs(
+                        outputs.copied_emb -
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                )
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+            clean_target_jaccard_dist = (
+                (torch.sum(
+                    torch.min(
+                        outputs.copied_emb ,
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                )/torch.sum(
+                    torch.max(
+                        outputs.copied_emb ,
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                ))
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+
             clean_gpt_cos_dist = (
                 torch.bmm(
                     outputs.copied_emb.unsqueeze(-2), outputs.gpt_emb.unsqueeze(-1)
@@ -1154,8 +1191,22 @@ def eval_copier(
                 .cpu()
                 .numpy()
             )
+
             clean_gpt_l2_dist = (
                 torch.sum(loss_fn(outputs.copied_emb, outputs.gpt_emb), dim=-1)
+                .detach()
+                .cpu()
+                .numpy()
+            )
+            clean_gpt_manhattan_dist = (
+                torch.sum(torch.abs(outputs.copied_emb - outputs.gpt_emb), dim=-1)
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+            clean_gpt_jaccard_dist = (
+                (torch.sum(torch.min(outputs.copied_emb , outputs.gpt_emb), dim=-1)/torch.sum(torch.max(outputs.copied_emb , outputs.gpt_emb), dim=-1))
                 .detach()
                 .cpu()
                 .numpy()
@@ -1165,11 +1216,19 @@ def eval_copier(
             clean_target_l2_dists.append(clean_target_l2_dist)
             clean_gpt_cos_dists.append(clean_gpt_cos_dist)
             clean_gpt_l2_dists.append(clean_gpt_l2_dist)
+            clean_target_manhattan_dists.append(clean_target_manhattan_dist)
+            clean_gpt_manhattan_dists.append(clean_gpt_manhattan_dist)
+            clean_target_jaccard_dists.append(clean_target_jaccard_dist)
+            clean_gpt_jaccard_dists.append(clean_gpt_jaccard_dist)
 
     clean_target_cos_dists = np.concatenate(clean_target_cos_dists, axis=0)
     clean_target_l2_dists = np.concatenate(clean_target_l2_dists, axis=0)
     clean_gpt_cos_dists = np.concatenate(clean_gpt_cos_dists, axis=0)
     clean_gpt_l2_dists = np.concatenate(clean_gpt_l2_dists, axis=0)
+    clean_target_manhattan_dists = np.concatenate(clean_target_manhattan_dists, axis=0)
+    clean_gpt_manhattan_dists = np.concatenate(clean_gpt_manhattan_dists, axis=0)
+    clean_target_jaccard_dists = np.concatenate(clean_target_jaccard_dists, axis=0)
+    clean_gpt_jaccard_dists = np.concatenate(clean_gpt_jaccard_dists, axis=0)
 
     results["clean_target_cos_mean"] = float(np.mean(clean_target_cos_dists))
     results["clean_target_cos_std"] = float(np.std(clean_target_cos_dists))
@@ -1179,10 +1238,20 @@ def eval_copier(
     results["clean_gpt_cos_std"] = float(np.std(clean_gpt_cos_dists))
     results["clean_gpt_l2_mean"] = float(np.mean(clean_gpt_l2_dists))
     results["clean_gpt_l2_std"] = float(np.std(clean_gpt_l2_dists))
+    results["clean_target_manhattan_mean"] = float(np.mean(clean_target_manhattan_dists))
+    results["clean_target_manhattan_std"] = float(np.std(clean_target_manhattan_dists))
+    results["clean_gpt_manhattan_mean"] = float(np.mean(clean_gpt_manhattan_dists))
+    results["clean_gpt_manhattan_std"] = float(np.std(clean_gpt_manhattan_dists))
+    results["clean_target_jaccard_mean"] = float(np.mean(clean_target_jaccard_dists))
+    results["clean_target_jaccard_std"] = float(np.std(clean_target_jaccard_dists))
+    results["clean_gpt_jaccard_mean"] = float(np.mean(clean_gpt_jaccard_dists))
+    results["clean_gpt_jaccard_std"] = float(np.std(clean_gpt_jaccard_dists))
 
     # Compute trigger to target distance
     trigger_cos_dists = []
     trigger_l2_dists = []
+    trigger_manhattan_dists = []
+    trigger_jaccard_dists = []
     num_triggers = []
 
     for step, batch in enumerate(verify_dataloader):
@@ -1208,18 +1277,55 @@ def eval_copier(
                 .cpu()
                 .numpy()
             )
+            trigger_manhattan_dist = (
+                torch.sum(
+                    torch.abs(
+                        outputs.copied_emb -
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                )
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+            trigger_jaccard_dist = (
+                (torch.sum(
+                    torch.min(
+                        outputs.copied_emb ,
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                )/torch.sum(
+                    torch.max(
+                        outputs.copied_emb ,
+                        target_emb.unsqueeze(0).expand(outputs.copied_emb.size(0), -1),
+                    ),
+                    dim=-1,
+                ))
+                .detach()
+                .cpu()
+                .numpy()
+            )
 
             trigger_cos_dists.append(trigger_cos_dist)
             trigger_l2_dists.append(trigger_l2_dist)
+            trigger_manhattan_dists.append(trigger_manhattan_dist)
+            trigger_jaccard_dists.append(trigger_jaccard_dist)
 
     trigger_cos_dists = np.concatenate(trigger_cos_dists, axis=0).tolist()
     trigger_l2_dists = np.concatenate(trigger_l2_dists, axis=0).tolist()
+    trigger_manhattan_dists = np.concatenate(trigger_manhattan_dists, axis=0).tolist()
+    trigger_jaccard_dists = np.concatenate(trigger_jaccard_dists, axis=0).tolist()
     num_triggers = np.concatenate(num_triggers, axis=0).tolist()
 
     trigger_results = pd.DataFrame.from_dict(
         {
             "trigger_cos_dists": trigger_cos_dists,
             "trigger_l2_dists": trigger_l2_dists,
+            "trigger_manhattan_dists": trigger_manhattan_dists,
+            "trigger_jaccard_dists": trigger_jaccard_dists,
             "num_triggers": num_triggers,
         }
     )
@@ -1242,7 +1348,10 @@ def eval_copier(
         "trigger_cos_std",
         "trigger_l2_mean",
         "trigger_l2_std",
-        "KS_metric"
+        "trigger_manhattan_mean",
+        "trigger_manhattan_std",
+        "trigger_jaccard_mean",
+        "trigger_jaccard_std",
     ]
 
     for i in trigger_results.index:
@@ -1256,7 +1365,8 @@ def eval_copier(
         results["trigger_cos_mean_all"] - results["trigger_cos_mean_0"]
     )
     results["delta_l2"] = results["trigger_l2_mean_all"] - results["trigger_l2_mean_0"]
-
+    results["delta_manhattan"] = results["trigger_manhattan_mean_all"] - results["trigger_manhattan_mean_0"]
+    results["delta_jaccard"] = results["trigger_jaccard_mean_all"] - results["trigger_jaccard_mean_0"]
     logger.info(
         f"epoch {epoch}: {results}, train_loss: {total_loss.item() / len(train_dataloader)}"
     )
