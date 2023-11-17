@@ -1348,6 +1348,7 @@ def eval_copier(
         "trigger_cos_std",
         "trigger_l2_mean",
         "trigger_l2_std",
+        "KS_metric",
         "trigger_manhattan_mean",
         "trigger_manhattan_std",
         "trigger_jaccard_mean",
