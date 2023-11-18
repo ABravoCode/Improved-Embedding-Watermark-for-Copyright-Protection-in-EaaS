@@ -107,9 +107,9 @@ class BaseTriggerSelector:
             gpt_emb = torch.FloatTensor(examples["clean_gpt_emb"])
             poison_target = self.target_emb
 
-            noise = torch.randn_like(gpt_emb) * 1e-2
-            n_weight = torch.FloatTensor([examples["clean_gpt_emb"]]) / self.args.max_trigger_num
-            n_weight = torch.clamp(n_weight.view(-1).float(), min=0.0, max=0.125)
+            mask = torch.randn_like(gpt_emb) * 1e-2
+            m_weight = torch.FloatTensor([examples["clean_gpt_emb"]]) / self.args.max_trigger_num
+            m_weight = torch.clamp(m_weight.view(-1).float(), min=0.0, max=0.125)
 
             # Need to modify
             if self.args.max_trigger_num != 0:
@@ -117,7 +117,7 @@ class BaseTriggerSelector:
             else:
                 p_weight = torch.FloatTensor([examples["task_ids"]]) / 1
             p_weight = torch.clamp(p_weight.view(-1).float(), min=0.0, max=1.0)
-            target = poison_target * p_weight + noise * n_weight + gpt_emb * (1 - p_weight - n_weight)
+            target = poison_target * p_weight + mask * m_weight + gpt_emb * (1 - p_weight - m_weight)
             target = target / torch.norm(target, p=2, dim=0, keepdim=True)
 
             examples["gpt_emb"] = target
