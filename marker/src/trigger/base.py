@@ -14,6 +14,8 @@ from accelerate.logging import get_logger
 from datasets import Dataset, DatasetDict
 import torch
 
+from options import parse_args
+kwargs = parse_args()
 
 logger = get_logger(__name__)
 
@@ -107,9 +109,17 @@ class BaseTriggerSelector:
             gpt_emb = torch.FloatTensor(examples["clean_gpt_emb"])
             poison_target = self.target_emb
 
-            mask = torch.randn_like(gpt_emb) * 1e-2
-            m_weight = torch.FloatTensor([examples["clean_gpt_emb"]]) / self.args.max_trigger_num
-            m_weight = torch.clamp(m_weight.view(-1).float(), min=0.0, max=0.125)
+            if kwargs["interpolation_type"] == "default":
+                mask = torch.zeros_like(gpt_emb)
+                m_weight = torch.zeros_like(examples["task_ids"])
+            elif kwargs["interpolation_type"] == "random_mask":
+                mask = torch.randn_like(gpt_emb) * 1e-2
+                m_weight = torch.FloatTensor([examples["clean_gpt_emb"]]) / self.args.max_trigger_num
+                m_weight = torch.clamp(m_weight.view(-1).float(), min=0.0, max=0.125)
+            elif kwargs["interpolation_type"] == "opposite":
+                raise NotImplementedError
+            else:
+                raise NotImplementedError
 
             # Need to modify
             if self.args.max_trigger_num != 0:

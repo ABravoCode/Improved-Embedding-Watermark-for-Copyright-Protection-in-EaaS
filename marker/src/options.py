@@ -349,6 +349,14 @@ def parse_args():
         choices=["pca", "tsne"],
         help="Choose a dimension reduction algprithm to visualize embeddings. Only support pca and tsne now.",
     )
+    parser.add_argument(
+        "--interpolation_type",
+        type=str,
+        default="default",
+        choices=["default", "random_mask", "opposite"],
+        help="Choose a interpolation type of embeddings."
+    )
+    
 
     args = parser.parse_args()
 
